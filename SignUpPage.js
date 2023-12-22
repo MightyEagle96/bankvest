@@ -1,5 +1,5 @@
 import { StatusBar } from "expo-status-bar";
-import React from "react";
+import React, { useEffect, useState } from "react";
 import {
   StyleSheet,
   Text,
@@ -8,91 +8,94 @@ import {
   KeyboardAvoidingView,
   Platform,
   ScrollView,
+  ActivityIndicator,
+  FlatList,
+  TouchableOpacity,
 } from "react-native";
+import useFetch from "./hooks/useFetch";
+import { SafeAreaView } from "react-native-safe-area-context";
+import { httpService } from "./httpService";
 
 export default function SignUpPage() {
+  const [todos, setTodos] = useState([]);
+  const [users, setUsers] = useState([]);
+  const [loading, setLoading] = useState(false);
+
+  const getTodos = async () => {
+    setLoading(true);
+    const { data, error } = await httpService("todos");
+    if (data) {
+      setTodos(data);
+    }
+    setLoading(false);
+  };
+
+  const getUsers = async () => {
+    setLoading(true);
+    const { data, error } = await httpService("users");
+
+    if (data) setUsers(data);
+    setLoading(false);
+  };
+
+  useEffect(() => {
+    getTodos();
+    getUsers();
+  }, []);
   return (
     <View style={styles.container}>
-      <View style={{ marginBottom: 20 }}>
-        <Text style={styles.signUpText}>CREATE ACCOUNT</Text>
+      <View>
+        <Text>TRYOUT</Text>
       </View>
-
-      <KeyboardAvoidingView
-        behavior={Platform.OS === "ios" ? "height" : "height"}
-        style={styles.formPad}
-      >
-        <View>
-          <Text style={{ marginBottom: 5, color: "#606470" }}>First Name:</Text>
-          <TextInput
-            style={styles.textInput}
-            placeholder="Username"
-            selectionColor={"#1e56a0"}
-            onChangeText={(e) => setLoginData({ ...loginData, username: e })}
-          />
-        </View>
-        <View>
-          <Text style={{ marginBottom: 5, color: "#606470" }}>Last Name:</Text>
-          <TextInput
-            style={styles.textInput}
-            placeholder="Username"
-            selectionColor={"#1e56a0"}
-            onChangeText={(e) => setLoginData({ ...loginData, username: e })}
-          />
-        </View>
-        <View>
-          <Text style={{ marginBottom: 5, color: "#606470" }}>
-            Email Address:
-          </Text>
-          <TextInput
-            style={styles.textInput}
-            placeholder="Username"
-            selectionColor={"#1e56a0"}
-            onChangeText={(e) => setLoginData({ ...loginData, username: e })}
-          />
-        </View>
-        <View>
-          <Text style={{ marginBottom: 5, color: "#606470" }}>Password:</Text>
-          <TextInput
-            style={styles.textInput}
-            placeholder="Username"
-            selectionColor={"#1e56a0"}
-            onChangeText={(e) => setLoginData({ ...loginData, username: e })}
-          />
-        </View>
-        <View style={{ marginBottom: 30 }}>
-          <Text style={{ marginBottom: 5, color: "#606470" }}>
-            Confirm Password:
-          </Text>
-          <TextInput
-            style={styles.textInput}
-            placeholder="Username"
-            selectionColor={"#1e56a0"}
-            onChangeText={(e) => setLoginData({ ...loginData, username: e })}
-          />
-        </View>
-      </KeyboardAvoidingView>
+      {loading && <ActivityIndicator />}
+      <SafeAreaView style={{ marginBottom: 30, marginTop: 30 }}>
+        <FlatList
+          showsHorizontalScrollIndicator={false}
+          data={users}
+          horizontal
+          renderItem={({ item }) => <UserCard item={item} />}
+        />
+      </SafeAreaView>
+      <SafeAreaView>
+        <FlatList
+          data={todos}
+          renderItem={({ item }) => <TodoCard item={item} />}
+        />
+      </SafeAreaView>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { marginTop: 80 },
-  signUpText: {
-    fontSize: 40,
-    fontWeight: "500",
-    textTransform: "capitalize",
-    color: "#1e56a0",
-  },
-  textInput: {
-    height: 50,
-
-    borderWidth: 1.5,
-    padding: 10,
-    borderRadius: 5,
-    borderColor: "#163172",
-    marginBottom: 20,
-    fontSize: 16,
-  },
-  formPad: { padding: 20 },
-  inputForm: {},
+  container: { padding: 20, marginTop: 30 },
+  personCard: { padding: 30 },
+  name: { fontWeight: "700" },
+  email: { fontWeight: "200" },
 });
+
+function TodoCard({ item }) {
+  return (
+    <TouchableOpacity>
+      <View style={styles.personCard}>
+        <Text>{item.title}</Text>
+      </View>
+    </TouchableOpacity>
+  );
+}
+
+function UserCard({ item }) {
+  return (
+    <TouchableOpacity
+      style={{
+        backgroundColor: "#385170",
+        padding: 10,
+        marginRight: 10,
+        borderRadius: 10,
+      }}
+    >
+      <View>
+        <Text style={{ color: "#ececec", fontSize: 18 }}>{item.name}</Text>
+      </View>
+    </TouchableOpacity>
+  );
+}
