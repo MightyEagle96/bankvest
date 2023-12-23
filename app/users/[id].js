@@ -12,7 +12,7 @@ import { httpService } from "../../httpService";
 import { SafeAreaView } from "react-native-safe-area-context";
 import {
   MaterialIcons,
-  FontAwesome5,
+  Feather,
   MaterialCommunityIcons,
 } from "@expo/vector-icons";
 

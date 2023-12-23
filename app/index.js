@@ -11,10 +11,12 @@ import {
 import { httpService } from "../httpService";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { peopleImages } from "../peopleImages";
+import NetworkFailure from "./NetworkFailure";
 
 export default function HomePage() {
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [networkError, setNetworkError] = useState(false);
   const getUsers = async () => {
     setLoading(true);
     const { data, error } = await httpService("users");
@@ -22,6 +24,7 @@ export default function HomePage() {
       setUsers(data);
     }
     if (error) {
+      setNetworkError(true);
       console.log(error);
     }
     setLoading(false);
@@ -31,12 +34,13 @@ export default function HomePage() {
     getUsers();
   }, []);
   return (
-    <SafeAreaView style={styles.container}>
+    <View style={styles.container}>
+      {networkError && <NetworkFailure />}
       <FlatList
         data={users}
         renderItem={({ item }) => <UserView item={item} />}
       />
-    </SafeAreaView>
+    </View>
   );
 }
 
@@ -83,11 +87,11 @@ function UserView({ item }) {
 
 const styles = StyleSheet.create({
   container: { padding: 15, backgroundColor: "#fff" },
-  name: { fontSize: 22, fontWeight: "500", color: "#34495e" },
+  name: { fontSize: 18, fontWeight: "500", color: "#34495e" },
   email: { color: "#22313f" },
   image: {
-    height: 80,
-    width: 80,
+    height: 50,
+    width: 50,
     borderRadius: "50%",
   },
   userThumbnail: {
