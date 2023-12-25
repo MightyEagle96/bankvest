@@ -7,6 +7,7 @@ import {
   TouchableOpacity,
   StyleSheet,
   Image,
+  RefreshControl,
 } from "react-native";
 import { httpService } from "../httpService";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -37,6 +38,9 @@ export default function HomePage() {
     <View style={styles.container}>
       {networkError && <NetworkFailure />}
       <FlatList
+        refreshControl={
+          <RefreshControl refreshing={loading} onRefresh={getUsers} />
+        }
         data={users}
         renderItem={({ item }) => <UserView item={item} />}
       />

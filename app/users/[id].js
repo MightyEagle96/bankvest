@@ -7,6 +7,7 @@ import {
   ScrollView,
   ActivityIndicator,
   FlatList,
+  RefreshControl,
 } from "react-native";
 import { httpService } from "../../httpService";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -21,15 +22,19 @@ export default function UserPage() {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(false);
   const [todos, setTodos] = useState([]);
-
+  const [networkError, setNetworkError] = useState(false);
+  const [refreshing, setRefreshing] = useState(false);
   const getUser = async () => {
     setLoading(true);
     const { data, error } = await httpService(`users/${id}`);
     if (data) {
-      console.log(data);
+      //console.log(data);
+      setNetworkError(true);
       setUser(data);
     }
-    if (error) console.log(error);
+    if (error) {
+      setNetworkError(true);
+    }
     setLoading(false);
   };
 
@@ -37,10 +42,11 @@ export default function UserPage() {
     const { data, error } = await httpService(`todos?userId=${id}`);
 
     if (data) {
+      console.log(data);
       setTodos(data);
     }
     if (error) {
-      console.log(error);
+      setNetworkError(true);
     }
   };
 
@@ -49,7 +55,20 @@ export default function UserPage() {
     getTodos();
   }, []);
   return (
-    <ScrollView style={styles.container}>
+    <ScrollView
+      refreshControl={
+        <RefreshControl
+          //refreshing={refreshing}
+          onRefresh={() => {
+            setRefreshing(true);
+            getUser();
+            getTodos();
+            setRefreshing(false);
+          }}
+        />
+      }
+      style={styles.container}
+    >
       {loading && <ActivityIndicator />}
       {user && (
         <View>
